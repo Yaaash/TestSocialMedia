@@ -40,3 +40,22 @@ Step 3: create Key Hash - beacause - To authenticate the exchange of information
 	
 
 Step 4: Start using Facebook events
+
+Step 5: Add Application ID given to you in Developer options in your strings.xml
+
+Step 6: Add User Permissions and Facebook meta data in manifest.xml
+
+Step 7: If using Facebook Login and Share feature - one more activity is supposed to be added to manifest.xml - "FacebookActivity"
+
+Step 8: If want to send Images and Videos using your app. Then you also need to declare FacebookContentProvider in you manifest. Naming convention based on your Application ID
+	Append your app id to the end of the authorities value. For example if your Facebook app id is 1234, the declaration looks like:
+	<provider android:authorities="com.facebook.app.FacebookContentProvider1234"
+          android:name="com.facebook.FacebookContentProvider"
+          android:exported="true" />
+
+Now you have all the prerequisites ready for Login Page integration in Facebook ->
+
+Step 9: Inititalise facebook sdk in yor code.
+
+Step 10: Now you can use different facebook functionalitites. 
+		// check sample project for more.
