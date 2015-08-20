@@ -6,18 +6,25 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 public class MainActivity extends Activity {
 
+    private CallbackManager callbackManager;
     private LoginButton loginButton;
-    CallbackManager callbackManager;
+    private AccessTokenTracker accessTokenTracker;
+    private AccessToken accessToken;
+    private ProfileTracker profileTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +40,7 @@ public class MainActivity extends Activity {
 
         // facebook login button
         loginButton = (LoginButton) findViewById(R.id.login_button);
-        loginButton.setReadPermissions("user_friends");
+        loginButton.setReadPermissions("user_friends", "public_profile");
 
         // initializing callback function
         callbackManager = CallbackManager.Factory.create();
@@ -55,6 +62,31 @@ public class MainActivity extends Activity {
                 // App code
             }
         });
+
+        // tracks the current access token
+        // only one person can access the login at a time
+        // facebook provide access token and profile for that user
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(
+                    AccessToken oldAccessToken,
+                    AccessToken currentAccessToken) {
+                // Set the access token using
+                // currentAccessToken when it's loaded or set.
+            }
+        };
+        // If the access token is available already assign it.
+        accessToken = AccessToken.getCurrentAccessToken();
+
+        // profile tracker tracks the changes in facebook profile of user
+        profileTracker = new ProfileTracker() {
+            @Override
+            protected void onCurrentProfileChanged(
+                    Profile oldProfile,
+                    Profile currentProfile) {
+                // App code
+            }
+        };
     }
 
     @Override
@@ -99,5 +131,16 @@ public class MainActivity extends Activity {
 
         // Logs 'app deactivate' App Event.
         AppEventsLogger.deactivateApp(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // internally access token tracker and profile tracker
+        // use receivers, so you need to call stopTracking() on an activity
+        // or call a fragment's onDestroy() method.
+        accessTokenTracker.stopTracking();
+        profileTracker.stopTracking();
     }
 }
