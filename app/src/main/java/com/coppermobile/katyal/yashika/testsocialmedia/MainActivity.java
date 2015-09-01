@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -17,6 +20,10 @@ import com.facebook.ProfileTracker;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends Activity {
 
@@ -44,6 +51,10 @@ public class MainActivity extends Activity {
 
         // initializing callback function
         callbackManager = CallbackManager.Factory.create();
+
+        // configuring twitter in start - for fast app
+        TwitterAuthConfig authConfig =  new TwitterAuthConfig("consumerKey", "consumerSecret");
+        Fabric.with(this, new Twitter(authConfig));
 
         // Callback registration
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -87,6 +98,41 @@ public class MainActivity extends Activity {
                 // App code
             }
         };
+
+        //onTouchListener to make floating button
+        loginButton.setOnTouchListener(new View.OnTouchListener() {
+            int prevX, prevY;
+
+            @Override
+            public boolean onTouch(final View v, final MotionEvent event) {
+                final FrameLayout.LayoutParams par = (FrameLayout.LayoutParams) v.getLayoutParams();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_MOVE: {
+                        par.topMargin += (int) event.getRawY() - prevY;
+                        prevY = (int) event.getRawY();
+                        par.leftMargin += (int) event.getRawX() - prevX;
+                        prevX = (int) event.getRawX();
+                        v.setLayoutParams(par);
+                        return true;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        par.topMargin += (int) event.getRawY() - prevY;
+                        par.leftMargin += (int) event.getRawX() - prevX;
+                        v.setLayoutParams(par);
+                        return true;
+                    }
+                    case MotionEvent.ACTION_DOWN: {
+                        prevX = (int) event.getRawX();
+                        prevY = (int) event.getRawY();
+                        par.bottomMargin = -2 * v.getHeight();
+                        par.rightMargin = -2 * v.getWidth();
+                        v.setLayoutParams(par);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     @Override
